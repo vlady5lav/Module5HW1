@@ -20,7 +20,7 @@ namespace ModuleHW.StartApp.Services
             return await RequestHandlerAsync(url, HttpMethod.Delete);
         }
 
-        public async Task<string> GetAsync(string url)
+        public async Task<string> GetStringAsync(string url)
         {
             return await RequestHandlerAsync(url, HttpMethod.Get);
         }
@@ -63,39 +63,42 @@ namespace ModuleHW.StartApp.Services
 
                     var response = await httpClient.SendAsync(httpMessage);
 
-                    if (response.StatusCode == HttpStatusCode.OK)
+                    if (response?.StatusCode == HttpStatusCode.OK || response?.StatusCode == HttpStatusCode.Created)
                     {
-                        Console.WriteLine("\nResponse Status: 200 OK");
+                        Console.WriteLine($"\nResponse: {(int)response.StatusCode} {response.StatusCode}");
 
-                        return await response.Content.ReadAsStringAsync();
+                        return await response.Content?.ReadAsStringAsync();
                     }
-                    else if (response.StatusCode == HttpStatusCode.Created)
+                    else if (response?.StatusCode == HttpStatusCode.NoContent || response?.StatusCode == HttpStatusCode.BadRequest || response?.StatusCode == HttpStatusCode.NotFound)
                     {
-                        Console.WriteLine("\nResponse Status: 201 Created");
+                        var text = $"Response: {(int)response.StatusCode} {response.StatusCode}";
 
-                        return await response.Content.ReadAsStringAsync();
-                    }
-                    else if (response.StatusCode == HttpStatusCode.NoContent)
-                    {
-                        Console.WriteLine("\nResponse Status: 204 No Content");
-                    }
-                    else if (response.StatusCode == HttpStatusCode.BadRequest)
-                    {
-                        Console.WriteLine("\nResponse Status: 400 Bad Request");
-                    }
-                    else if (response.StatusCode == HttpStatusCode.NotFound)
-                    {
-                        Console.WriteLine("\nResponse Status: 404 Not Found");
+                        Console.WriteLine($"\n{text}");
+
+                        var result = await response.Content?.ReadAsStringAsync();
+
+                        if (result?.Length < 3)
+                        {
+                            return text;
+                        }
+
+                        return result;
                     }
                     else
                     {
-                        Console.WriteLine($"\nError:\n" +
-                            $"Status: {response?.StatusCode}\n" +
-                            $"Method: {httpMethod}\n" +
-                            $"Url: {url}");
-                    }
+                        var text = $"Response: {(int)response?.StatusCode} {response?.StatusCode}";
 
-                    return default;
+                        Console.WriteLine($"\n{text}");
+
+                        var result = await response?.Content?.ReadAsStringAsync();
+
+                        if (result?.Length < 3)
+                        {
+                            return text;
+                        }
+
+                        return result;
+                    }
                 }
             }
             catch (Exception ex)
@@ -112,15 +115,15 @@ namespace ModuleHW.StartApp.Services
             {
                 var response = await httpClient.GetAsync(url);
 
-                if (response.StatusCode == HttpStatusCode.OK)
+                if (response?.StatusCode == HttpStatusCode.OK)
                 {
                     return await response.Content.ReadAsByteArrayAsync();
                 }
                 else
                 {
-                    Console.WriteLine($"\nError:\n" +
-                        $"Status: {response?.StatusCode}\n" +
-                        $"Url: {url}");
+                    var text = $"\nResponse: {(int)response?.StatusCode} {response?.StatusCode}";
+
+                    Console.WriteLine(text);
 
                     return default;
                 }

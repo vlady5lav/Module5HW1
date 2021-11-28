@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Threading.Tasks;
+
+using Microsoft.Extensions.DependencyInjection;
 
 using ModuleHW.StartApp.Services;
 
@@ -6,7 +8,7 @@ namespace ModuleHW.StartApp
 {
     public class Starter
     {
-        public void Run()
+        public async Task Run()
         {
             var serviceProvider = new ServiceCollection()
                 .AddTransient<Application>()
@@ -15,7 +17,7 @@ namespace ModuleHW.StartApp
                 .BuildServiceProvider();
 
             var app = serviceProvider.GetRequiredService<Application>();
-            app.Start();
+            await app.Start();
         }
     }
 }

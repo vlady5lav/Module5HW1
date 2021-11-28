@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace ModuleHW.StartApp.Models
 {
@@ -19,20 +18,5 @@ namespace ModuleHW.StartApp.Models
 
         [JsonPropertyName("avatar")]
         public string? Avatar { get; set; }
-
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
-
-        [JsonPropertyName("job")]
-        public string? Job { get; set; }
-
-        [JsonPropertyName("createdAt")]
-        public DateTime? CreatedAt { get; set; }
-
-        [JsonPropertyName("updatedAt")]
-        public DateTime? UpdatedAt { get; set; }
-
-        [JsonPropertyName("password")]
-        public string? Password { get; set; }
     }
 }

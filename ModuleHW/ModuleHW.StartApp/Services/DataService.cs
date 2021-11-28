@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -22,27 +22,31 @@ namespace ModuleHW.StartApp.Services
         {
             try
             {
-                var content = await _httpService?.GetAsync(url);
+                var content = await _httpService?.GetStringAsync(url);
 
-                if (content == default)
+                if (content == default || !content.Trim().StartsWith("{"))
                 {
-                    return default;
+                    return (T)(object)content;
                 }
 
                 var response = JsonSerializer.Deserialize<Response<T>>(content);
                 var data = response.Data;
 
-                if (data is ICollection)
+                if (data is ICollection<User>)
                 {
-                    foreach (var t in data as ICollection)
+                    foreach (var user in data as ICollection<User>)
                     {
-                        await GetUserAvatarAsync(t);
+                        await GetUserAvatarAsync(user);
                     }
 
                     return data;
                 }
 
-                await GetUserAvatarAsync(data);
+                if (data is User)
+                {
+                    await GetUserAvatarAsync(data as User);
+                }
+
                 return data;
             }
             catch (Exception ex)
@@ -53,15 +57,15 @@ namespace ModuleHW.StartApp.Services
             }
         }
 
-        public async Task<T> CreatePostAsync<T>(string url, T payload)
+        public async Task<T> PostAsync<T>(string url, object payload)
         {
             try
             {
                 var content = await _httpService?.PostAsync(url, payload);
 
-                if (content == default)
+                if (content == default || !content.Trim().StartsWith("{"))
                 {
-                    return default;
+                    return (T)(object)content;
                 }
 
                 var response = JsonSerializer.Deserialize<T>(content);
@@ -76,13 +80,20 @@ namespace ModuleHW.StartApp.Services
             }
         }
 
-        public async Task<string> DeleteAsync(string url)
+        public async Task<T> DeleteAsync<T>(string url)
         {
             try
             {
                 var content = await _httpService?.DeleteAsync(url);
 
-                return content;
+                if (content == default || !content.Trim().StartsWith("{"))
+                {
+                    return (T)(object)content;
+                }
+
+                var response = JsonSerializer.Deserialize<T>(content);
+
+                return response;
             }
             catch (Exception ex)
             {
@@ -92,15 +103,15 @@ namespace ModuleHW.StartApp.Services
             }
         }
 
-        public async Task<T> UpdatePatchAsync<T>(string url, T payload)
+        public async Task<T> PatchAsync<T>(string url, object payload)
         {
             try
             {
                 var content = await _httpService?.PatchAsync(url, payload);
 
-                if (content == default)
+                if (content == default || !content.Trim().StartsWith("{"))
                 {
-                    return default;
+                    return (T)(object)content;
                 }
 
                 var response = JsonSerializer.Deserialize<T>(content);
@@ -115,15 +126,15 @@ namespace ModuleHW.StartApp.Services
             }
         }
 
-        public async Task<T> UpdatePutAsync<T>(string url, T payload)
+        public async Task<T> PutAsync<T>(string url, object payload)
         {
             try
             {
                 var content = await _httpService?.PutAsync(url, payload);
 
-                if (content == default)
+                if (content == default || !content.Trim().StartsWith("{"))
                 {
-                    return default;
+                    return (T)(object)content;
                 }
 
                 var response = JsonSerializer.Deserialize<T>(content);
@@ -138,19 +149,14 @@ namespace ModuleHW.StartApp.Services
             }
         }
 
-        private async Task GetUserAvatarAsync(object u)
+        private async Task GetUserAvatarAsync(User user)
         {
             try
             {
-                if (u is User)
-                {
-                    var user = u as User;
-
-                    var avatar = await _httpService?.GetBytesAsync(user?.Avatar);
-                    var filePath = $"avatars\\{user?.Avatar[(user.Avatar.LastIndexOf("/") + 1) ..]}";
-                    Directory.CreateDirectory("avatars");
-                    await File.WriteAllBytesAsync(filePath, avatar);
-                }
+                var avatar = await _httpService?.GetBytesAsync(user?.Avatar);
+                var filePath = $"avatars\\{user?.Avatar[(user.Avatar.LastIndexOf("/") + 1) ..]}";
+                Directory.CreateDirectory("avatars");
+                await File.WriteAllBytesAsync(filePath, avatar);
             }
             catch (Exception ex)
             {
