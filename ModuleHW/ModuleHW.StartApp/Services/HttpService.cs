@@ -4,9 +4,11 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
+using ModuleHW.StartApp.Abstractions;
+
 namespace ModuleHW.StartApp.Services
 {
-    public class HttpService
+    public class HttpService : IHttpService
     {
         private readonly string _apiUrl;
 

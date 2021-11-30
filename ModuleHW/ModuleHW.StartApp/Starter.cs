@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
+using ModuleHW.StartApp.Abstractions;
 using ModuleHW.StartApp.Services;
 
 namespace ModuleHW.StartApp
@@ -12,8 +13,8 @@ namespace ModuleHW.StartApp
         {
             var serviceProvider = new ServiceCollection()
                 .AddTransient<Application>()
-                .AddTransient<HttpService>()
-                .AddTransient<DataService>()
+                .AddTransient<IHttpService, HttpService>()
+                .AddTransient<IApiService, ApiService>()
                 .BuildServiceProvider();
 
             var app = serviceProvider.GetRequiredService<Application>();

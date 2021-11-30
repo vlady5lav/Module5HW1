@@ -4,15 +4,16 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
+using ModuleHW.StartApp.Abstractions;
 using ModuleHW.StartApp.Models;
 
 namespace ModuleHW.StartApp.Services
 {
-    public class DataService
+    public class ApiService : IApiService
     {
-        private readonly HttpService _httpService;
+        private readonly IHttpService _httpService;
 
-        public DataService(HttpService httpService)
+        public ApiService(IHttpService httpService)
         {
             _httpService = httpService;
         }
@@ -286,7 +287,7 @@ namespace ModuleHW.StartApp.Services
                 if (user != default)
                 {
                     var avatar = await _httpService?.GetBytesArrayAsync(user?.Avatar);
-                    var filePath = $@"avatars\{user?.Avatar[(user.Avatar.LastIndexOf("/") + 1) ..]}";
+                    var filePath = $@"avatars\{user?.Avatar[(user.Avatar.LastIndexOf("/") + 1)..]}";
                     Directory.CreateDirectory("avatars");
                     await File.WriteAllBytesAsync(filePath, avatar);
                 }

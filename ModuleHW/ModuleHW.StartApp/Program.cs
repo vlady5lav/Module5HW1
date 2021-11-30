@@ -9,6 +9,7 @@ namespace ModuleHW.StartApp
             var starter = new Starter();
             starter.Run().GetAwaiter().GetResult();
 
+            Console.WriteLine("\nAll tasks completed!");
             Console.ReadKey();
         }
     }
