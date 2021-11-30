@@ -1,51 +1,51 @@
 ﻿using System;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-using ModuleHW.StartApp.Abstractions;
-
 namespace ModuleHW.StartApp.Services
 {
-    public class HttpService : IHttpService
+    public class HttpService
     {
+        private readonly string _apiUrl;
+
         public HttpService()
         {
+            _apiUrl = "https://reqres.in/api/";
         }
 
-        public async Task<string> DeleteAsync(string url)
+        public async Task<string> DeleteAsync(string requestUrl)
         {
-            return await RequestHandlerAsync(url, HttpMethod.Delete);
+            return await RequestHandlerAsync(requestUrl, HttpMethod.Delete);
         }
 
-        public async Task<string> GetStringAsync(string url)
+        public async Task<string> GetStringAsync(string requestUrl)
         {
-            return await RequestHandlerAsync(url, HttpMethod.Get);
+            return await RequestHandlerAsync(requestUrl, HttpMethod.Get);
         }
 
-        public async Task<byte[]> GetBytesAsync(string url)
+        public async Task<byte[]> GetBytesArrayAsync(string requestUrl)
         {
-            return await GetBytesArrayAsync(url);
+            return await GetBytesAsync(requestUrl);
         }
 
-        public async Task<string> PatchAsync(string url, object payload)
+        public async Task<string> PatchAsync(string requestUrl, object payload)
         {
-            return await RequestHandlerAsync(url, HttpMethod.Patch, payload);
+            return await RequestHandlerAsync(requestUrl, HttpMethod.Patch, payload);
         }
 
-        public async Task<string> PostAsync(string url, object payload)
+        public async Task<string> PostAsync(string requestUrl, object payload)
         {
-            return await RequestHandlerAsync(url, HttpMethod.Post, payload);
+            return await RequestHandlerAsync(requestUrl, HttpMethod.Post, payload);
         }
 
-        public async Task<string> PutAsync(string url, object payload)
+        public async Task<string> PutAsync(string requestUrl, object payload)
         {
-            return await RequestHandlerAsync(url, HttpMethod.Put, payload);
+            return await RequestHandlerAsync(requestUrl, HttpMethod.Put, payload);
         }
 
-        private async Task<string> RequestHandlerAsync(string url, HttpMethod httpMethod, object payload = null)
+        private async Task<string> RequestHandlerAsync(string requestUrl, HttpMethod httpMethod, object payload = null)
         {
             try
             {
@@ -58,75 +58,59 @@ namespace ModuleHW.StartApp.Services
                         httpMessage.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
                     }
 
-                    httpMessage.RequestUri = new Uri($@"{url}");
+                    httpMessage.RequestUri = new Uri($@"{_apiUrl}{requestUrl}");
                     httpMessage.Method = httpMethod;
 
                     var response = await httpClient.SendAsync(httpMessage);
 
-                    if (response?.StatusCode == HttpStatusCode.OK || response?.StatusCode == HttpStatusCode.Created)
+                    var status = $"Response: {(int)response?.StatusCode} {response?.StatusCode}";
+
+                    Console.WriteLine($"\n{status ?? "No Response! :("}");
+
+                    var result = await response?.Content?.ReadAsStringAsync();
+
+                    if (result != default && result.Trim().StartsWith("{") && result.Trim().Length > 2)
                     {
-                        Console.WriteLine($"\nResponse: {(int)response.StatusCode} {response.StatusCode}");
-
-                        return await response.Content?.ReadAsStringAsync();
-                    }
-                    else if (response?.StatusCode == HttpStatusCode.NoContent || response?.StatusCode == HttpStatusCode.BadRequest || response?.StatusCode == HttpStatusCode.NotFound)
-                    {
-                        var text = $"Response: {(int)response.StatusCode} {response.StatusCode}";
-
-                        Console.WriteLine($"\n{text}");
-
-                        var result = await response.Content?.ReadAsStringAsync();
-
-                        if (result?.Length < 3)
-                        {
-                            return text;
-                        }
-
                         return result;
                     }
                     else
                     {
-                        var text = $"Response: {(int)response?.StatusCode} {response?.StatusCode}";
+                        Console.WriteLine($"\nContent of \"{httpMessage.RequestUri}\": \"{result ?? "No Result! :("}\"");
 
-                        Console.WriteLine($"\n{text}");
-
-                        var result = await response?.Content?.ReadAsStringAsync();
-
-                        if (result?.Length < 3)
-                        {
-                            return text;
-                        }
-
-                        return result;
+                        return default;
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"\n{ex.Message}");
+                Console.WriteLine($"\n{ex?.Message ?? "Unknown exception!"}");
 
                 return default;
             }
         }
 
-        private async Task<byte[]> GetBytesArrayAsync(string url)
+        private async Task<byte[]> GetBytesAsync(string requestUrl)
         {
-            using (var httpClient = new HttpClient())
+            try
             {
-                var response = await httpClient.GetAsync(url);
-
-                if (response?.StatusCode == HttpStatusCode.OK)
+                using (var httpClient = new HttpClient())
                 {
-                    return await response.Content.ReadAsByteArrayAsync();
-                }
-                else
-                {
-                    var text = $"\nResponse: {(int)response?.StatusCode} {response?.StatusCode}";
+                    var response = await httpClient.GetAsync(requestUrl);
 
-                    Console.WriteLine(text);
+                    var status = $"Response: {(int)response?.StatusCode} {response?.StatusCode}";
 
-                    return default;
+                    Console.WriteLine($"\n{status ?? "No Response :("}");
+
+                    var result = await response?.Content?.ReadAsByteArrayAsync();
+
+                    return result ?? default;
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\n{ex?.Message ?? "Unknown exception!"}");
+
+                return default;
             }
         }
     }

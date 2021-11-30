@@ -2,7 +2,7 @@
 
 namespace ModuleHW.StartApp.Models
 {
-    public class Login
+    public class LoginRequest
     {
         [JsonPropertyName("email")]
         public string? Email { get; set; }

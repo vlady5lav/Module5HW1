@@ -2,7 +2,7 @@
 
 namespace ModuleHW.StartApp.Models
 {
-    public class Response<T>
+    public class ApiResponse<T>
     {
         [JsonPropertyName("page")]
         public int? Page { get; set; }

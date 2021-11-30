@@ -2,15 +2,12 @@
 
 namespace ModuleHW.StartApp.Models
 {
-    public class AuthToken
+    public class RegisterSuccessfulResponse
     {
         [JsonPropertyName("id")]
         public int? Id { get; set; }
 
         [JsonPropertyName("token")]
         public string? Token { get; set; }
-
-        [JsonPropertyName("error")]
-        public string? Error { get; set; }
     }
 }
